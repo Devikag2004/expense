@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const db = require('./server/db'); // Already connected
+const path = require('path');
 
 dotenv.config();
 
@@ -11,12 +12,15 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Route to check server status
+// ✅ Serve static files (frontend) from "public" folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ✅ Route to serve index.html on root
 app.get('/', (req, res) => {
-  res.send('🚀 Expense Tracker API is running!');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Route to add a new expense
+// ✅ Route to add a new expense
 app.post('/expenses', (req, res) => {
   const { title, amount, category, date } = req.body;
   const sql = 'INSERT INTO expenses (title, amount, category, date) VALUES (?, ?, ?, ?)';
@@ -29,7 +33,7 @@ app.post('/expenses', (req, res) => {
   });
 });
 
-// Route to get all expenses
+// ✅ Route to get all expenses
 app.get('/expenses', (req, res) => {
   db.query('SELECT * FROM expenses', (err, results) => {
     if (err) {
@@ -37,7 +41,6 @@ app.get('/expenses', (req, res) => {
       return res.status(500).json({ error: 'Failed to fetch expenses' });
     }
 
-    // Check if result is an array and log
     if (Array.isArray(results)) {
       console.log('✅ Expenses fetched from DB:', results);
     } else {
@@ -48,7 +51,7 @@ app.get('/expenses', (req, res) => {
   });
 });
 
-// Start the server
+// ✅ Start the server
 app.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
 });
